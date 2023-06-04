@@ -1,18 +1,9 @@
 import 'package:bloc/bloc.dart';
 
-Future<void> main(List<String> args) async {
-  final cubit = CounterCubit();
-  final subscription = cubit.stream.listen(print);
-  cubit.increment();
-  await Future.delayed(Duration.zero);
-  await subscription.cancel();
-  await cubit.close();
-
-  // print(cubit.state);
-  // cubit.close();
-  // Stream<int> stream = countStream(10);
-  // int sum = await sumStream(stream);
-  // print(sum);
+void main(List<String> args) {
+  CounterCubit()
+    ..increment()
+    ..close();
 }
 
 Stream<int> countStream(int max) async* {
