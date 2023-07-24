@@ -1,34 +1,39 @@
 import 'package:bloc/bloc.dart';
 
-void main(List<String> args) {
-  CounterCubit()
-    ..increment()
-    ..close();
+Future<void> main(List<String> args) async {
+  final bloc = CounterBloc();
+  final subscription = bloc.stream.listen(print);
+  // print(bloc.state);
+  bloc.add(CounterIncrementPressed());
+  await Future.delayed(Duration.zero);
+  await subscription.cancel();
+  // print(bloc.state);
+  await bloc.close();
 }
 
-Stream<int> countStream(int max) async* {
-  for (int i = 0; i < max; i++) {
-    yield i;
+class SimpleBlocObserver extends BlocObserver {
+  @override
+  void onChange(BlocBase bloc, Change change) {
+    super.onChange(bloc, change);
+    print('${bloc.runtimeType} $change');
   }
-}
-
-Future<int> sumStream(Stream<int> stream) async {
-  int sum = 0;
-  await for (int value in stream) {
-    sum += value;
-  }
-  return sum;
-}
-
-class CounterCubit extends Cubit<int> {
-  // CounterCubit(int initialstate) : super(initialstate);
-  CounterCubit() : super(0);
-  void increment() => emit(state + 1);
 
   @override
-  void onChange(Change<int> change) {
-    // TODO: implement onChange
-    super.onChange(change);
-    print(change);
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    // print('${bloc.runtimeType} $error $stackTrace');
+    super.onError(bloc, error, stackTrace);
+  }
+}
+
+sealed class CounterEvent {}
+
+final class CounterIncrementPressed extends CounterEvent {}
+
+class CounterBloc extends Bloc<CounterEvent, int> {
+  CounterBloc() : super(0) {
+    on<CounterIncrementPressed>((event, emit) {
+      // handle incoming `CounterIncrementPressed` event
+      emit(state + 1);
+    });
   }
 }
